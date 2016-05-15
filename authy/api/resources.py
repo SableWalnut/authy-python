@@ -1,7 +1,8 @@
-import requests
 import platform
-from authy import __version__, AuthyFormatException
-from urllib import quote
+
+import requests
+
+from authy import AuthyFormatException, __version__
 
 # import json
 try:
@@ -12,6 +13,10 @@ except ImportError:
     except ImportError:
         from django.utils import simplejson as json
 
+try:
+    from urllib import quote
+except ImportError:
+    from urllib.parse import quote
 
 class Resource(object):
     def __init__(self, api_uri, api_key):
@@ -34,7 +39,9 @@ class Resource(object):
     def request(self, method, path, data = {}, headers = {}):
         url = self.api_uri + path
         params = {"api_key": self.api_key}
-        headers = dict(self.def_headers.items() + headers.items())
+        combined_dict = dict(self.def_headers.copy())
+        combined_dict.update(headers)
+        headers = combined_dict
 
         if method == "GET":
             params.update(data)
